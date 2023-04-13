@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="form-row" style="margin-top: 35px;">
+        <div class="form-group col-md-2 mb-0">
+            WHEN
+        </div>
+        <div class="form-group col-md-3 mb-0">
+            {{form.start_date|as_crispy_field }}
+        </div>
+        <div class="form-group col-md-1.5 mb-0">
+            {{ form.start_hour|as_crispy_field }}
+        </div>
+        <div style="margin-top: 35px;">
+            :
+        </div>
+        <div class="form-group col-md-1.5 mb-0">
+            {{ form.start_minute|as_crispy_field }}
+        </div>
+        <div class="form-group col-md-1 mb-0">
+            {{ form.ampm|as_crispy_field }}
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-2 mb-0">
+            DURATION
+        </div>
+        <div class="form-group col-md-3 mb-0">
+            {{form.duration_hour|as_crispy_field}}
+        </div>
+        <div style="margin-top: 35px; margin-right: 20px;">
+            hr
+        </div>
+        <div class="form-group col-md-3 mb-0">
+            {{form.duration_minute|as_crispy_field}}
+        </div>
+        <div style="margin-top: 35px;">
+            min
+        </div>
+    </div>
+    <div class="form-row" style="margin-top: 10px; margin-left: 125px;">
+        {{ form.recur_check }} &nbsp Recurring Meeting
+    </div>
+    <div class="form-row" id="RecurDiv" style="display: none; margin-top: 10px; margin-left: 190px;">
+        <div class="form-group col-md-3 mb-0">
+            {{ form.recur_options|as_crispy_field }}
+        </div>
+        <div id="recurrenceDiv" style="display: none;">
+            <div class="form-row" style="margin-top: 20px; margin-left: 5px;">
+                Recurrence:
+            </div>
+            <div class="form-row" style="margin-top: 5px; margin-left: 5px;">
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.sun|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.mon|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.tue|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.wed|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.thu|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.fri|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-0.5 mb-0">
+                    {{ form.sat|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+
+        <div id="enddateDiv">
+            <div class="form-row" style="margin-left: 5px;">
+                End Date
+            </div>
+            <div class="form-row" style="margin-left: 5px; margin-top: 5px;">
+                <div class="form-group col-md-3 mb-0">
+                    {{ form.end_date_check }} By:
+                    <div id="by_div">
+                        {{ form.end_date | as_crispy_field }}
+                    </div>
+                </div>
+                <div style="margin-top: 30px; margin-left: 20px;">
+                    or
+                </div>
+                <div class="form-group col-md-3 mb-0", style="margin-left: 20px;">
+                    {{ form.occurences_check }} After ? occurences
+                    <div id="occur_div">
+                        {{ form.occurences | as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row" style="margin-top: 20px; margin-left: 35vw;">
+        <button type="submit" class="btn btn-primary">Book Now</button>
+    </div>
+</form>
+{% if recur_check == 1 %}
+    <p>&nbsp;</p>
+    <p>Start Dates and Times: &nbsp; {{multiple_start}}</p>
+    <p>End Dates and Times: &nbsp; {{multiple_end}}</p>
+    {% for start, end, i in multiple_dates%}
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>Start Date and Time {{i}}: &nbsp; {{start}}</p>
+            <p>End Date and Time {{i}}: &nbsp;&nbsp; {{end}}</p>
+    {% endfor %}
+{% elif recur_check == 0 %}
+    <p>&nbsp;</p>
+    <p>Start Date and Time: &nbsp; {{start_str}}</p>
+    <p>End Date and Time: &nbsp;&nbsp; {{end_str}}</p>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="button1">Click me</button>
+</form>
+<script>
+    var recur_shown = false
+    var days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]
+    var end_by = false
+    var end_date_temp = ""
+    var occur_temp = 1
+
+    function clear_recurdays(){
+        $("#id_mon").prop("checked", false)
+        $("#id_tue").prop("checked", false)
+        $("#id_wed").prop("checked", false)
+        $("#id_thu").prop("checked", false)
+        $("#id_fri").prop("checked", false)
+        $("#id_sat").prop("checked", false)
+        $("#id_sun").prop("checked", false)
+    }
+
+    $("#id_recur_options").change(function(){
+        recur_option = $("#id_recur_options").val()
+        switch(recur_option){
+        case "daily":
+            $("#recurrenceDiv").css("display", "none")
+            clear_recurdays()
+            break
+        case "monthly":
+            $("#recurrenceDiv").css("display", "none")
+            clear_recurdays()
+            break
+        default:
+            $("#recurrenceDiv").css("display", "block")
+            break
+        }
+    })
+
+
+    $("#id_recur_check").click(function(){
+        if(recur_shown){
+            $("#RecurDiv").css("display", "none")
+            recur_shown = false
+            clear_recurdays()
+        }
+        else{
+            $("#RecurDiv").css("display", "block")
+            recur_shown = true
+            var date_given = $("#id_start_date").val()
+            console.log(date_given)
+            if(date_given.length != 0){
+                var d = new Date(date_given)
+                console.log(d)
+                var day_id = ("#id_" + days[d.getDay()])
+                console.log(day_id)
+                $(day_id).prop('checked', true)
+            }
+        }
+    })
+
+    $("#id_end_date_check").click(function() {
+        if(!end_by){
+            end_by = true
+            $("#id_occurences_check").prop('checked', false)
+            occur_temp = $("#id_occurences").val()
+            $("#id_occurences").val("")
+            $("#id_occurences").attr("disabled", true)
+            $("#id_end_date").attr("disabled", false)
+            $("#id_end_date").val(end_date_temp)
+        }
+        else{
+            $("#id_end_date_check").prop("checked", true)
+        }
+    })
+
+    $("#id_occurences_check").click(function() {
+        if (end_by) {
+            end_by = false
+            $("#id_end_date_check").prop('checked', false)
+            end_date_temp = $("#id_end_date").val()
+            $("#id_end_date").val("")
+            $("#id_end_date").attr("disabled", true)
+            $("#id_occurences").attr("disabled", false)
+            $("#id_occurences").val(occur_temp)
+        }
+        else{
+            $("#id_occurences_check").prop("checked", true)
+        }
+    })
+
+    $(document).ready(function(){
+        $("#id_end_date").attr("disabled", "disabled")
+        $("#id_occurences_check").prop("checked", true)
+        $("#id_recur_check").prop('checked', false)
+    })
+</script>
+{% endblock %}
+
